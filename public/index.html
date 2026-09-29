@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PromptForge — AI Intent & Desktop Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-text">
+          <h1>PromptForge</h1>
+          <span class="subtitle">Intent-to-Impact AI Assistant</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="provider-pill">
+          <label for="providerSelect">Provider:</label>
+          <select id="providerSelect">
+            <option value="gemini">Google Gemini</option>
+            <option value="openai">OpenAI</option>
+          </select>
+        </div>
+
+        <div class="status-indicator" id="statusIndicator">
+          <span class="dot"></span>
+          <span class="status-label">Checking API...</span>
+        </div>
+
+        <button class="icon-button" id="settingsBtn" title="API Settings">
+          ⚙️ Settings
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Input Section -->
+      <section class="input-card">
+        <div class="input-header">
+          <h2>What is your goal or request?</h2>
+          <span class="hint">Don't worry about phrasing — just type raw thoughts. PromptForge will architect the rest.</span>
+        </div>
+
+        <div class="input-container">
+          <textarea 
+            id="minimalInput" 
+            placeholder="e.g., 'email to manager asking for 15% raise' or 'python script to parse invoice pdfs' or '7-day keto meal plan'..." 
+            rows="3"
+            autofocus
+          ></textarea>
+        </div>
+
+        <!-- Quick Idea Chips -->
+        <div class="chips-row">
+          <span class="chips-label">Quick Ideas:</span>
+          <button class="chip" data-query="Write an email to my manager asking for a promotion and 20% salary increase based on my recent accomplishments">📈 Request Promotion</button>
+          <button class="chip" data-query="Python script using asyncio and playwright to scrape product prices with error handling">💻 Async Web Scraper</button>
+          <button class="chip" data-query="High-converting freelance web development proposal template for a prospective small business client">📑 Consulting Proposal</button>
+          <button class="chip" data-query="A comprehensive 14-day study plan to master Docker and Kubernetes for a junior backend developer">🐳 Docker Study Roadmap</button>
+          <button class="chip" data-query="Apologize professionally to a client for a project deadline delay while setting clear revised milestones">✉️ Client Delay Apology</button>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <div class="category-select-wrapper">
+            <label for="categorySelect">Goal Focus:</label>
+            <select id="categorySelect">
+              <option value="auto">⚡ Auto-Detect</option>
+              <option value="coding">💻 Software & Code</option>
+              <option value="communication">✉️ Business & Email</option>
+              <option value="planning">📅 Strategy & Planning</option>
+              <option value="content">✍️ Writing & Content</option>
+            </select>
+          </div>
+
+          <div class="buttons-group">
+            <button id="enhanceBtn" class="btn btn-secondary">
+              <span>✨ Enhance Prompt Only</span>
+            </button>
+            <button id="pipelineBtn" class="btn btn-primary">
+              <span>⚡ Enhance & Run (1-Click)</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress / Loading Banner -->
+      <div id="loader" class="loader-banner hidden">
+        <div class="spinner"></div>
+        <span id="loaderText">Deconstructing your intent and engineering a master prompt...</span>
+      </div>
+
+      <!-- Output Split View -->
+      <section id="outputSection" class="output-grid hidden">
+        <!-- Left Pane: The Master Prompt -->
+        <div class="card result-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>🎯 Engineered Master Prompt</h3>
+              <span class="badge" id="engineBadge">Rule-Based</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn-xs" id="copyPromptBtn">📋 Copy Prompt</button>
+              <button class="btn-xs btn-highlight" id="runEngineeredBtn">▶ Run Now</button>
+            </div>
+          </div>
+
+          <!-- Intent Breakdown Tags -->
+          <div class="intent-meta" id="intentMeta">
+            <div class="meta-item">
+              <span class="meta-label">Persona:</span>
+              <span class="meta-value" id="personaTag">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Domain:</span>
+              <span class="meta-value" id="categoryTag">-</span>
+            </div>
+            <div class="meta-enhancements" id="enhancementsList"></div>
+          </div>
+
+          <div class="card-body">
+            <textarea id="engineeredPromptText" class="prompt-code" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <!-- Right Pane: Live Execution Result -->
+        <div class="card result-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>🚀 Final AI Deliverable</h3>
+              <span class="badge badge-accent" id="providerBadge">Ready</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn-xs" id="copyResultBtn">📋 Copy Result</button>
+            </div>
+          </div>
+
+          <div class="card-body markdown-body" id="finalResultBody">
+            <div class="empty-state">Click <strong>"Enhance & Run"</strong> to generate the full solution immediately.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- History Section -->
+      <section class="history-section">
+        <div class="section-title">
+          <h3>🕒 Recent Prompts & Tasks</h3>
+          <button id="clearHistoryBtn" class="text-link">Clear</button>
+        </div>
+        <div id="historyList" class="history-grid">
+          <div class="empty-history">Your generated prompts and deliverables will be saved here for quick access.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>⚙️ API Configuration</h3>
+          <button class="close-modal" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Provide your API keys to enable real-time prompt enhancement and generation directly with Gemini and OpenAI. Keys are stored locally on your machine.
+          </p>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="geminiKeyInput">Google Gemini API Key</label>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" class="ext-link">Get Free Key &rarr;</a>
+            </div>
+            <input type="password" id="geminiKeyInput" placeholder="AIzaSy..." autocomplete="off">
+            <span class="field-hint">Supports Gemini 2.5 Flash / Pro (Free tier available)</span>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="openaiKeyInput">OpenAI API Key</label>
+              <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" class="ext-link">Get Key &rarr;</a>
+            </div>
+            <input type="password" id="openaiKeyInput" placeholder="sk-..." autocomplete="off">
+            <span class="field-hint">Supports GPT-4o / GPT-4o-mini</span>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="cancelSettingsBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveKeysBtn">Save & Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
